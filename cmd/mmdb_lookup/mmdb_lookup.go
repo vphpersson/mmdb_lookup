@@ -11,7 +11,6 @@ import (
 	"log/slog"
 	"mmdb_lookup/pkg/mmdb_lookup"
 	"os"
-	"strings"
 	"sync"
 )
 
@@ -71,7 +70,7 @@ func main() {
 		},
 		databaseReader,
 		logger,
-		func(records []*mmdbinspect.RecordForNetwork) {
+		func(maybeNetwork string, records []*mmdbinspect.RecordForNetwork) {
 			for _, record := range records {
 				recordMap, ok := record.Record.(map[string]any)
 				if !ok {
@@ -82,8 +81,7 @@ func main() {
 						1,
 					)
 				}
-				ipAddressString, _ := strings.CutSuffix(record.Network, "/32")
-				recordMap["ip_address"] = ipAddressString
+				recordMap["ip_address"] = maybeNetwork
 
 				data, err := json.Marshal(recordMap)
 				if err != nil {
