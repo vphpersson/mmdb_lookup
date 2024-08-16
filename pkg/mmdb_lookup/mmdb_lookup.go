@@ -43,7 +43,7 @@ func LookupNetworkIterator(
 	seq iter.Seq[string],
 	reader *maxminddb.Reader,
 	logger *slog.Logger,
-	callback func([]*mmdbinspect.RecordForNetwork),
+	callback func(string, []*mmdbinspect.RecordForNetwork),
 ) []*mmdbinspect.RecordForNetwork {
 	var allRecords []*mmdbinspect.RecordForNetwork
 
@@ -68,7 +68,7 @@ func LookupNetworkIterator(
 
 			if len(records) != 0 {
 				if callback != nil {
-					callback(records)
+					callback(maybeNetwork, records)
 				}
 				recordsMutex.Lock()
 				allRecords = append(allRecords, records...)
@@ -86,7 +86,7 @@ func LookupNetworks(
 	networks []string,
 	reader *maxminddb.Reader,
 	logger *slog.Logger,
-	callback func([]*mmdbinspect.RecordForNetwork),
+	callback func(string, []*mmdbinspect.RecordForNetwork),
 ) []*mmdbinspect.RecordForNetwork {
 	return LookupNetworkIterator(
 		slices.Values(networks),
