@@ -1,12 +1,12 @@
 package mmdb_lookup
 
 import (
+	"context"
 	"errors"
 	"github.com/Motmedel/utils_go/utils_go"
 	"github.com/maxmind/mmdbinspect/pkg/mmdbinspect"
 	"github.com/oschwald/maxminddb-golang"
 	"iter"
-	"log/slog"
 	"slices"
 	"sync"
 )
@@ -40,9 +40,9 @@ func Lookup(maybeNetwork string, reader *maxminddb.Reader) ([]*mmdbinspect.Recor
 }
 
 func LookupNetworkIterator(
+	ctx context.Context,
 	seq iter.Seq[string],
 	reader *maxminddb.Reader,
-	logger *slog.Logger,
 	callback func(string, []*mmdbinspect.RecordForNetwork),
 ) []*mmdbinspect.RecordForNetwork {
 	var allRecords []*mmdbinspect.RecordForNetwork
@@ -63,7 +63,11 @@ func LookupNetworkIterator(
 
 			records, err := Lookup(maybeNetwork, reader)
 			if err != nil {
-				utils_go.LogError("An error occurred when retrieving records.", err, logger)
+				utils_go.LogError(
+					"An error occurred when retrieving records.",
+					err,
+					utils_go.GetLoggerFromCtxWithDefault(ctx, nil),
+				)
 			}
 
 			if len(records) != 0 {
@@ -83,15 +87,15 @@ func LookupNetworkIterator(
 }
 
 func LookupNetworks(
+	ctx context.Context,
 	networks []string,
 	reader *maxminddb.Reader,
-	logger *slog.Logger,
 	callback func(string, []*mmdbinspect.RecordForNetwork),
 ) []*mmdbinspect.RecordForNetwork {
 	return LookupNetworkIterator(
+		ctx,
 		slices.Values(networks),
 		reader,
-		logger,
 		callback,
 	)
 }

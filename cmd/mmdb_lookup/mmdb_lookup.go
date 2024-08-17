@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -52,10 +53,10 @@ func main() {
 	}
 
 	var printMutex sync.Mutex
-
 	scanner := bufio.NewScanner(ipAddressesInput)
 
 	mmdb_lookup.LookupNetworkIterator(
+		utils_go.CtxWithLogger(context.Background(), logger),
 		func(yield func(string) bool) {
 			for scanner.Scan() {
 				ipAddressString := scanner.Text()
@@ -69,7 +70,6 @@ func main() {
 			}
 		},
 		databaseReader,
-		logger,
 		func(maybeNetwork string, records []*mmdbinspect.RecordForNetwork) {
 			for _, record := range records {
 				recordMap, ok := record.Record.(map[string]any)
